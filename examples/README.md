@@ -1,6 +1,6 @@
 # 示例代码
 
-9 个能跑的例子。**不需要 API key，不花钱，结果可预测。**
+12 个能跑的例子。**不需要 API key，不花钱，结果可预测。**
 
 ## 为什么用"假模型"
 
@@ -37,6 +37,22 @@ python examples/ch1_langchain/e01_hello.py
 | `e03_branch.py` | 条件边（漏分支编译时不报） |
 | `e04_loop.py` | 循环（退出条件写错会跑死） |
 | `e05_pause.py` | interrupt 会让节点**重跑** |
+
+## 第三部分：概念演示（不调模型）
+
+| 文件 | 教什么 |
+|---|---|
+| `e01_trajectory.py` | 从轨迹里查"它为什么这么决定" |
+| `e02_multi_agent_math.py` | 3 个 90% 串行只有 73% |
+| `e03_handoff.py` | 交接漏一个字段会怎样 |
+
+**这三个不调模型**——它们演示的是"结构"和"算术"，不需要 AI。
+
+跑法一样：
+
+```bash
+python examples/ch3_concepts/e01_trajectory.py
+```
 
 ## 换成真模型
 

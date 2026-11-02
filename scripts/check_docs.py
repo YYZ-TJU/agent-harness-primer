@@ -103,7 +103,7 @@ def check_examples_listed() -> None:
     listed = set(re.findall(r"`(e\d{2}_[a-z_]+\.py)`", readme))
 
     actual = set()
-    for d in ("ch1_langchain", "ch2_langgraph"):
+    for d in ("ch1_langchain", "ch2_langgraph", "ch3_concepts"):
         for f in (ROOT / "examples" / d).glob("e*.py"):
             actual.add(f.name)
 

@@ -1,61 +1,173 @@
 # 附录 B · 数据来源
 
-> 正文里引用的论文、基准和实践总结。
+> 正文里引用的论文、基准、实践总结。
 >
-> **核对程度**：论文核对了摘要页，基准核对了公开结果页。**没有逐个复核原始论文。**
-> 要用在生产决策上，建议回原文。
+> **每个来源都标了「核实到哪一步」**——因为"看过摘要"和"复核过原始数据"是两回事。
 
 ---
 
-## 完整清单
+## 核实程度分三级
 
-| 主题 | 来源 |
+| 级别 | 含义 | 正文里怎么标 |
+|---|---|---|
+| **A · 已核实原始页** | 打开过原始页面，数字对得上 | 直接写数字 |
+| **B · 只看了摘要/二手转述** | 搜索摘要里有这个数字，没进原文 | 标注"未核实原始页" |
+| **C · 推断** | 没有来源，从原理推的 | 明写"这是推断" |
+
+---
+
+## 一、核心论文与基准（A 级）
+
+### JetBrains：遮蔽降成本 52%
+
+| 项 | 内容 |
 |---|---|
-| workflow vs agent | Anthropic, *Building effective agents* |
-| Agent 五模式 | aihive 2026 综述、aisoftwaredev.io、techademy |
-| 上下文遮蔽（52% 成本降幅） | JetBrains, *The Complexity Trap*, **arXiv 2508.21433** |
-| context-rot（18 模型全退化） | Chroma 2025 研究 |
-| 压缩阈值 60-70% | agentnative.dev compaction 模式总结 |
-| ACON 压缩（26-54% token 降幅） | **ICML 2026, arXiv 2510.00615** |
-| RAG 基准（48/69/99%） | TigerGraph Agentic GraphRAG 基准, 2026-10 |
-| RAG 幻觉率对照 | Blue Guardrails, PlaceboBench 2026 |
-| MCP 规范 2026-07-28 | modelcontextprotocol.io、dataaihub 解读 |
-| MCP 企业架构 | veluralabs 2026 指南 |
-| 工具设计七条 | creativegenius 2026 实践指南 |
-| Plan-Execute 降本 40-60% | aihive 2026 企业实践报告 |
+| 标题 | *The Complexity Trap: Simple Observation Masking Is More Token-efficient and as Effective as LLM Summarization for Agent Context Management* |
+| 编号 | arXiv 2508.21433 |
+| 结论 | 仅靠 observation masking，降成本约 52%，SWE-bench 解决率提高约 2.6% |
+| 核实 | 摘要页。**未复核全文实验数据** |
 
-**注意**：行业综述类来源（aihive / veluralabs / creativegenius）是二手总结，数字可能有出入。
-论文和公开基准（arXiv、TigerGraph、Blue Guardrails）可信度更高。
+**我们在自己的任务上复现，得到相反结果**（第 06 章）。这不是否定论文——是前提不同（SWE-bench 的文件可重读，我们的任务要跨历史汇总）。
 
-**我引用的数字没有逐个复核原始论文**，只核对了摘要页。如果要用在生产决策上，建议回原文。
+### TigerGraph：Agentic GraphRAG 99% vs RAG 48%
 
+| 项 | 内容 |
+|---|---|
+| 来源 | TigerGraph Agentic GraphRAG Hackathon Round 1 |
+| 代码 | github.com/anirudh12032008/agentic-graphrag-tigergraph |
+| 数据 | 2,951 篇奥运维基文章，100 道公开题 |
+| 模型 | Claude Sonnet，同一套 embedding，同一套数据库 |
+| 核实 | **原始博客页**，分项数据全部核对 |
+
+**关键分项**（第 09 章引用）：
+
+```
+题型              RAG    GraphRAG  Agentic
+lookup (19)      100%    100%      100%
+aggregation (21)   0%     67%      100%
+superlative (10)  40%     80%       90%
+temporal (22)     36%     86%      100%
+multi_hop (28)    57%     21%      100%
+```
+
+**三个值得注意的点**：
+
+1. lookups 上三种方法都是 100% —— **不需要 agent**
+2. aggregation 上 RAG 是 **0/21** —— 向量检索排"语义相似"，不是"关系聚合"
+3. **GraphRAG 在 multi_hop 上比 RAG 还差**（21% vs 57%）—— 固定图扩展种子错了会自信地拉无关事实
+
+### Blue Guardrails：PlaceboBench 幻觉率
+
+| 项 | 内容 |
+|---|---|
+| 来源 | blueguardrails.com，PlaceboBench |
+| 数据 | 69 个真实临床医生问题，EMA 药品说明书 |
+| 模型 | GPT-5.4 |
+| 指标 | 幻觉率 = 含至少一个无证据支持断言的回答占比 |
+| 核实 | **原始博客页**，四组数字全部核对 |
+
+```
+方法                     幻觉率
+Hybrid RAG（向量+图）      8.7%
+GraphRAG                 14.5%
+Naive RAG                23.2%
+Agentic vector RAG       30.4%
+```
+
+**⚠️ 我在这份文档里写错过一次**：
+
+初稿写成「传统 RAG 8.7%」，实际 8.7% 是 **Hybrid RAG**，标准 RAG 是 **23.2%**。
+
+原因是只看了一行摘要就下结论，没读完整表格。**2026-11-02 已修正。**
 
 ---
 
-## 可信度分级
+## 二、实践总结（B 级，二手）
 
-| 类型 | 例子 | 可信度 |
+### Anthropic：Building effective agents
+
+| 项 | 内容 |
+|---|---|
+| 结论 | workflow vs agent 的判断标准；"20-50 个真实失败用例比几百个合成的有用" |
+| 核实 | 摘要与多篇引用。**未读原文** |
+
+### 多 agent 失败模式
+
+| 项 | 内容 |
+|---|---|
+| 来源 | 多篇 2026 年工程博客（CSDN / 智流科技 / FlipFactory 等） |
+| 关键数字 | 34% 静默失败（命名空间碰撞）、17 个 agent 在 47ms 内改同一条、ERP 锁死 18 小时 |
+| 核实 | **二手转述**。原始事故报告无法获取 |
+
+**这些数字当"案例"看，不当"统计"看。** 单个公司的复盘不能推广成行业规律。
+
+### Gartner 与 MIT NANDA
+
+| 数字 | 来源 | 核实 |
 |---|---|---|
-| 论文（有 arXiv 编号） | JetBrains 2508.21433 | 高 |
-| 公开基准（有数据集和代码） | TigerGraph Agentic GraphRAG | 高 |
-| 企业实践总结 | aihive / veluralabs | 中（二手） |
-| 媒体转述 | 各类博客 | 低 |
+| 40% agentic 项目会在 2027 前取消 | Gartner | 二手引用，未见原始报告 |
+| 95% GenAI pilot 无可测量 P&L 影响 | MIT Project NANDA | 二手引用 |
 
-**正文里标「实测」的，是我们自己跑的。**
+**这两条我用得克制**——只用来论证"生产化比 demo 难"，没拿它们推具体结论。
 
 ---
 
-## 一处必须说明的矛盾
+## 三、我们自己实测的（最可靠）
 
-关于 RAG，我搜到两份结论相反的基准：
-
-| 基准 | 任务类型 | 结论 |
+| 数据 | 在哪 | 怎么复现 |
 |---|---|---|
-| TigerGraph | 聚合 / 多跳 | Agentic 最好（99% vs 48%） |
-| Blue Guardrails | 医药事实问答 | Agentic 幻觉率最高（30.4% vs 8.7%） |
+| pass^3 = 100%（10 用例 × 3 次） | 第 14 章 | `python -m run_real --repeat 3` |
+| Wilson 下界 88.6% | 第 14 章 | 第 14 章的代码块 |
+| 遮蔽导致 C01/C10 失败 | 第 06 章 | 开 `mask_tool_results=True` 跑门禁 |
+| 压缩 10 次、峰值 1119 token | 第 06 章 | 跑 C10，看 `context.compacted` 事件 |
+| 退避抖动采样 0.1-2.0 | 第 18 章 | `backoff()` 跑 10 次 |
+| 门禁 233ms / --full 630ms | 第 15 章 | `lg-harness gate [--full]` |
+| kappa：模糊 88% / -0.03 | 第 15 章 | 构造 90 pass + 10 fail 的标签 |
 
-**不能简单说「agentic RAG 更好」。**
+**这些数字的可信度高于上面所有二手来源**——因为你能自己跑一遍。
 
-agentic 检索只在「证据分散、需要逐层确认」时有价值；单点事实题上，多轮检索是纯成本 + 纯噪音。
+---
 
-**两份都列出来，因为它们同等重要。**
+## 四、一处必须说明的矛盾
+
+关于 RAG，两份基准看起来相反：
+
+| 基准 | 任务 | 结论 |
+|---|---|---|
+| TigerGraph | 聚合 / 多跳 | Agentic 最好（99%） |
+| PlaceboBench | 单点事实（药品说明） | Agentic 幻觉最高（30.4%） |
+
+**不能简单说"agentic RAG 更好"。**
+
+**更准确**：
+
+> agentic 的价值在「需要多步检索」的场合。
+> 单点事实题上，多轮检索是纯成本 + 纯噪音。
+
+**两份都要列，因为它们同等重要**——只列一份会得出片面结论。
+
+---
+
+## 五、怎么用这份附录
+
+**要引用这里的数字**：
+
+1. 先看核实级别
+2. A 级的可以引用，但要带上下文（"在奥运问答这个任务上"）
+3. B 级的加"据某公司复盘"
+4. C 级的别当数据用
+
+**要质疑某个结论**：
+
+```
+① 自己跑一遍（最可靠）
+② 找原始论文/基准
+③ 找二手转述
+④ 才是我写的这段
+```
+
+**第 ④ 层永远可能出错。** 上面那个 8.7% 就是例子。
+
+---
+
+_2026-11-02 重写，标注核实级别。_
