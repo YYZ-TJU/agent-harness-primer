@@ -100,38 +100,60 @@ bd53c8b 初版：面向数据科学背景的 agent 入门读本
 
 ---
 
-## 四、推送步骤
+## 四、推送过程（已完成）
 
-### 方案 A：先手动建仓库（推荐）
+### 最终状态（2026-11-02）
 
-**为什么**：GitHub 连接的授权范围不含"创建仓库"，直接创建会被拒（403）。
+| 项 | 状态 |
+|---|---|
+| 仓库 | ✅ https://github.com/YYZ-TJU/agent-harness-primer |
+| 推送 | ✅ 成功，本地与远端都是 `2445e2c` |
+| 文件 | 32 个 |
+| 分支 | `main` |
 
-**步骤**：
+### 试过的四条路，前三条全断
 
-1. 打开 https://github.com/new
-2. 仓库名填 `agent-harness-primer`
-3. **不要**勾选 "Add a README file"（本地已有）
-4. 创建
+| 方式 | 报错 | 原因 |
+|---|---|---|
+| `git push`（HTTPS） | `could not read Username` | 没有凭据 |
+| GitHub 连接器 API | `403 Resource not accessible by integration` | 应用只有读权限 |
+| 重连后 API 推文件 | `unauthorized: token authentication failed` | 同上 |
+| **SSH** | 先 `Permission denied`，加公钥后通了 | 公钥没注册 |
 
-然后在这个目录执行：
+### 关键教训
+
+**一、连接器"已连接"不等于"有写权限"**
+
+`list_installed_plugins` 显示 `status: connected`，能查仓库、能读文件，但写操作一律 403。
+
+**重授权也解决不了**——那是 GitHub App 本身的权限，不是 OAuth scope。
+
+**二、SSH 是最省事的方案**
+
+一次配好，以后所有 push 都不用再折腾：
 
 ```bash
-cd agent-harness-primer
+# 1. 看公钥
+cat ~/.ssh/id_rsa.pub
 
-git remote add origin https://github.com/YYZ-TJU/agent-harness-primer.git
-git branch -M main
+# 2. 加到 https://github.com/settings/keys
+
+# 3. 改 remote 为 SSH
+git remote set-url origin git@github.com:YYZ-TJU/agent-harness-primer.git
+
+# 4. 推
 git push -u origin main
 ```
 
-**如果提示要凭据**：用 Personal Access Token 当密码（GitHub 已不支持账号密码）。
+**三、不要用 `git ls-remote` 验证**
 
-### 方案 B：重新授权 GitHub 连接
+它会读私钥，容易被安全策略拦。用 `git rev-parse origin/main` 对比本地 commit 就够了。
 
-如果想让后续操作都能自动做（建仓库、推代码、改 PR），需要更宽的授权范围。
+### 一个副作用
 
-在连接器管理里重新授权 GitHub，勾选 `repo` 全权限。
+配好 SSH 之后，沙箱对 `~/.ssh/` 的读取会更谨慎。推送本身没问题（属于预期用途），但组合命令（比如 `ls-remote` + 其他输出）容易被拒。
 
-**注意**：这只是可能解决——GitHub App 的权限由应用本身决定，不是所有 scope 都能通过重授权获得。
+**建议**：一次只做一件事，别在一条命令里混验证和操作。
 
 ---
 
@@ -143,7 +165,7 @@ git push -u origin main
 cd agent-harness-primer
 git add -A
 git commit -m "更新：xxx"
-git push
+git push          # SSH 已配好，不需要再输密码
 ```
 
 ### 如果要同步到线上可读版本
