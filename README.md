@@ -1,5 +1,7 @@
 # Agent Harness Primer
 
+[![CI](https://github.com/YYZ-TJU/agent-harness-primer/actions/workflows/ci.yml/badge.svg)](https://github.com/YYZ-TJU/agent-harness-primer/actions/workflows/ci.yml)
+
 **给数据科学背景的人的 Agent 入门读本**
 
 > 你会用 pandas，懂模型训练和推理，但没写过生产系统。
