@@ -1,6 +1,6 @@
 # 示例代码
 
-12 个能跑的例子。**不需要 API key，不花钱，结果可预测。**
+15 个能跑的例子。**不需要 API key，不花钱，结果可预测。**
 
 ## 为什么用"假模型"
 
@@ -45,6 +45,9 @@ python examples/ch1_langchain/e01_hello.py
 | `e01_trajectory.py` | 从轨迹里查"它为什么这么决定" |
 | `e02_multi_agent_math.py` | 3 个 90% 串行只有 73% |
 | `e03_handoff.py` | 交接漏一个字段会怎样 |
+| `e04_mcp.py` | 一个 client 连两个 server，看协议传了什么 |
+| `e05_rag.py` | 手写检索：分块 → 向量 → 余弦 → 阈值 |
+| `e06_memory.py` | 提取、冲突、隔离三个坑 |
 
 **这三个不调模型**——它们演示的是"结构"和"算术"，不需要 AI。
 
