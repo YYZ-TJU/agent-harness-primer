@@ -7,21 +7,25 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# 新的推送取消排队中的旧运行——避免一直卡在队列里
+# 新推送取消排队中的旧 run，避免堆积
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: 示例 + 文档
+  test:
+    name: 示例 + 文档 (py${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
 
       - name: 安装依赖
         run: pip install -r requirements.txt
