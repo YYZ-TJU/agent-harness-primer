@@ -428,4 +428,4 @@ LIMIT 5;
 
 ---
 
-**下一篇**：[10 · Memory 与 Skills](10-Memory与Skills.md) —— 跨会话记住，跨项目复用
+**下一篇**：[10 · Ontology](10-Ontology.md) —— 让 agent 理解业务结构

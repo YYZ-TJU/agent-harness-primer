@@ -1,4 +1,4 @@
-# 10 · Memory 与 Skills
+# 11 · Memory 与 Skills
 
 > 前面讲的 agent，每次对话都是独立的。
 >
@@ -354,4 +354,4 @@ skills/
 
 ---
 
-**下一篇**：[11 · Handoff](11-Handoff.md) —— 任务交接
+**下一篇**：[12 · Handoff](12-Handoff.md) —— 任务交接
