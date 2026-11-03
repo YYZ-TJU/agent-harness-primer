@@ -58,6 +58,40 @@ def check_numbering() -> None:
         errors.append(f"[编号] 不连续：期望 {expected}，实际 {nums}")
 
 
+def check_section_numbers() -> None:
+    """每章的二级标题编号必须递增且不重复。
+
+    为什么需要：插入新小节时改了标题忘了改编号，
+    会出现两个「六、」。肉眼很难发现。
+    """
+    cn = "一二三四五六七八九十"
+    for f in sorted(GUIDE.glob("*.md")):
+        text = f.read_text(encoding="utf-8")
+        # 只取二级标题（## 一、xxx），跳过代码块
+        body = re.sub(r"```.*?```", "", text, flags=re.S)
+        found = re.findall(r"^## ([一二三四五六七八九十]+)、", body, re.M)
+        if not found:
+            continue
+
+        # 中文数字转 int
+        def cn2int(c: str) -> int:
+            if c == "十":
+                return 10
+            if c.startswith("十"):
+                return 10 + cn.index(c[1]) + 1
+            if c.endswith("十"):
+                return (cn.index(c[0]) + 1) * 10
+            if len(c) == 1:
+                return cn.index(c) + 1
+            return 0
+
+        nums = [cn2int(c) for c in found]
+        expected = list(range(1, len(nums) + 1))
+        if nums != expected:
+            errors.append(
+                f"[小节] {f.name} 编号不连续：{found}（应为 一到{found[-1] if found else ''}）")
+
+
 def check_h1() -> None:
     """每章第一行必须是 # NN · 标题，且编号和文件名一致。"""
     for f in sorted(GUIDE.glob("*.md")):
@@ -117,6 +151,7 @@ def main() -> int:
     check_links()
     check_numbering()
     check_h1()
+    check_section_numbers()
     check_next_links()
     check_required_files()
     check_examples_listed()
