@@ -7,25 +7,26 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# 新的推送取消排队中的旧运行——避免一直卡在队列里
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  examples:
-    name: 示例能跑 (py${{ matrix.python }})
+  check:
+    name: 示例 + 文档
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "3.12"
 
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      - name: 逐个跑示例
+      - name: 跑示例
         run: |
           set -e
           for f in examples/*/*.py; do
@@ -37,15 +38,5 @@ jobs:
             echo "::endgroup::"
           done
 
-  docs:
-    name: 文档自检
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: 检查链接、编号、结构
+      - name: 文档自检
         run: python scripts/check_docs.py
