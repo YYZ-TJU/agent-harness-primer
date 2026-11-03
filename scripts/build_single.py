@@ -34,9 +34,9 @@ GROUPS = [
     ("第三部分：知识从哪来", ["08", "09", "10", "11"]),
     ("第四部分：多主体", ["12", "13"]),
     ("第五部分：评估", ["14", "15", "16", "17"]),
-    ("第六部分：生产化", ["18", "19", "20", "21"]),
-    ("第七部分：动手", ["22"]),
-    ("第八部分：经验", ["23", "24"]),
+    ("第六部分：生产化", ["18", "19", "20", "21", "22"]),
+    ("第七部分：动手", ["23"]),
+    ("第八部分：经验", ["24", "25"]),
 ]
 
 CSS = """
@@ -113,8 +113,8 @@ def md_to_html(path: Path) -> str:
 
 def main() -> None:
     files = sorted(GUIDE.glob("*.md"))
-    if len(files) != 24:
-        print(f"警告：预期 24 章，实际 {len(files)} 章", file=sys.stderr)
+    if len(files) != 25:
+        print(f"警告：预期 25 章，实际 {len(files)} 章", file=sys.stderr)
 
     by_num = {f.name[:2]: f for f in files}
 
@@ -143,7 +143,7 @@ def main() -> None:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Harness Primer · 24 章</title>
+<title>Agent Harness Primer · 25 章</title>
 <style>{CSS}</style>
 </head>
 <body id="top">
